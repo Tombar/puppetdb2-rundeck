@@ -7,9 +7,9 @@ require 'yaml'
 require 'sinatra'
 
 # Base URL of the PuppetDB database.  Do not include a trailing slash!
-HOST_URL = 'http://localhost:8080'
+HOST_URL = 'http://172.31.47.215:8080'
 # Number of seconds to cache the previous results for
-CACHE_SECONDS = 300
+CACHE_SECONDS = 1
 
 class PuppetDB
 
@@ -79,30 +79,46 @@ class Rundeck
   def build_resources
   	resources = Hash.new
 		@puppetdb.resources.each do |d| 
-			host     = d['certname']
-			title    = d['title']
-			resources[host] = Hash.new if !resources.key?(host)
-			resources[host]['tags'] = Array.new if !resources[host].key?('tags')
-			resources[host]['tags'] << title
+			begin
+				host     = d['certname']
+				title    = d['title']
+				resources[host] = Hash.new if !resources.key?(host)
+				resources[host]['tags'] = Array.new if !resources[host].key?('tags')
+				resources[host]['tags'] << title
+			rescue NoMethodError 
+				puts d['certname']
+			end
 		end
 
 		resources.keys.sort.each do |k|
-			resources[k]['tags'].uniq!
-			resources[k]['tags'] =  resources[k]['tags'].join(",")
-			resources[k]['hostname'] = k
+			begin
+				resources[k]['tags'].uniq!
+				resources[k]['tags'] =  resources[k]['tags'].join(",")
+				resources[k]['hostname'] = k
+				rescue NoMethodError 
+				puts d['certname']
+			rescue NoMethodError 
+				puts d['certname']
+			end
 		end
 
 		@puppetdb.facts.each do |d|
-			host     = d['certname']
-			if d['name'] != "hostname"
-				name  = d['name']
-		    value = d['value'] if d['name'] != "hostname"
-		    if ( name == 'serialnumber' )
-		      resources[host][name] = 'Serial Number ' + value
-		    else
+			begin
+				host = d['certname']
+				if d['name'] != "hostname"
+					name  = d['name']
+				    value = d['value'] if d['name'] != "hostname"
+				    if ( name == 'serialnumber' )
+				      resources[host][name] = 'Serial Number ' + value
+				    else
 					resources[host][name] = value
+				    end
 				end
+			rescue NoMethodError 
+				puts d['certname']
 			end
+	
+
 		end
 		resources
   end
