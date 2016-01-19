@@ -7,7 +7,7 @@ require 'yaml'
 require 'sinatra'
 
 # Base URL of the PuppetDB database.  Do not include a trailing slash!
-HOST_URL = 'http://172.31.47.215:8080'
+HOST_URL = 'http://REPLACE_WITH_LOCALIP:8080'
 # Number of seconds to cache the previous results for
 CACHE_SECONDS = 1
 
